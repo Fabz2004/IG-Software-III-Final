@@ -1,0 +1,158 @@
+﻿<!-- Modal de inicio de sesión -->
+<div id="loginModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden z-50">
+    <div class="bg-[#E1DECD] w-full max-w-md p-6 rounded-lg shadow-lg relative">
+        <button type="button"
+                class="js-close-login absolute top-2 right-2 text-gray-600 hover:text-black">
+            ✕
+        </button>
+
+        <h3 class="text-lg italic text-center tracking-wider mb-2">Bienvenido a</h3>
+        <div class="flex justify-center mb-4">
+            <img src="~/Imagenes/ALODANLOGO.jpeg" alt="ALODAN" class="h-14 w-auto" />
+        </div>
+
+        <!-- 🟢 Formulario de login -->
+        <form id="loginForm" method="post" action="@Url.Action("Login", "Cuenta")">
+            @Html.AntiForgeryToken()
+
+            <!-- FIX de comillas en Origen -->
+            <input type="hidden" name="Origen" value="@((ViewBag.Origen ?? "Cuenta"))" />
+
+            <input type="email" id="loginEmail" name="Email" placeholder="Correo electrónico"
+                   class="w-full p-2 border border-black rounded mb-3 bg-[#E1DECD]" required />
+            <input type="password" id="loginPassword" name="Password" placeholder="Contraseña"
+                   class="w-full p-2 border border-black rounded mb-3 bg-[#E1DECD]" required />
+
+            <button type="submit"
+                    class="w-full bg-black text-white py-2 rounded hover:bg-gray-800">
+                Iniciar sesión
+            </button>
+        </form>
+
+        <p class="mt-4 text-center text-sm text-gray-700">
+            ¿No tienes cuenta?
+            <button type="button" class="js-open-registro text-black font-semibold hover:underline">
+                Regístrate aquí
+            </button>
+        </p>
+    </div>
+</div>
+
+<!-- Modal de registro -->
+<div id="registroModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden z-50">
+    <div class="bg-[#E1DECD] w-full max-w-md p-6 rounded-lg shadow-lg relative">
+        <button type="button"
+                class="js-close-registro absolute top-2 right-2 text-gray-600 hover:text-black">
+            ✕
+        </button>
+
+        <h3 class="text-lg italic text-center tracking-wider mb-2">Crear cuenta</h3>
+
+        <!-- 🧩 Formulario de registro -->
+        <form id="registroForm" method="post" action="@Url.Action("Registro", "Cuenta")">
+            @Html.AntiForgeryToken()
+
+            <input type="text" id="nombre" name="Nombre" placeholder="Nombre completo"
+                   class="w-full p-2 border border-gray-300 rounded mb-3" required />
+
+            <input type="email" id="email" name="Email" placeholder="Correo electrónico"
+                   class="w-full p-2 border border-gray-300 rounded mb-3" required />
+
+            <input type="password" id="password" name="Password" placeholder="Contraseña (mínimo 8 caracteres)"
+                   class="w-full p-2 border border-gray-300 rounded mb-3" required minlength="8" />
+
+            <input type="text" id="telefono" name="Telefono" placeholder="Teléfono (9 dígitos)"
+                   class="w-full p-2 border border-gray-300 rounded mb-3" required pattern="\d{9}" />
+
+            <textarea id="direccion" name="Direccion" placeholder="Dirección de envío"
+                      class="w-full p-2 border border-gray-300 rounded mb-3" required></textarea>
+
+            <button type="submit"
+                    class="w-full bg-black text-white py-2 rounded hover:bg-gray-800">
+                Registrarse
+            </button>
+        </form>
+    </div>
+</div>
+
+
+
+<!-- Scripts -->
+<script nonce="@Context.Items["CspNonce"]" src="~/js/sweetalert2.min.js"></script>
+
+<script nonce="@Context.Items["CspNonce"]" src="~/js/validacionesLogin.js"></script>
+
+<script nonce="@Context.Items["CspNonce"]">
+    function abrirRegistro() {
+        document.getElementById('loginModal').classList.add('hidden');
+        document.getElementById('registroModal').classList.remove('hidden');
+    }
+
+    // Mostrar alertas del servidor
+    // Mostrar alertas del servidor
+    document.addEventListener("DOMContentLoaded", function () {
+        // ✅ Detectar error de registro
+        @if (TempData["ErrorRegistro"] != null)
+        {
+                    <text>
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Registro inválido',
+                            text: '@TempData["ErrorRegistro"]',
+                            confirmButtonColor: '#000'
+                        }).then(() => {
+                            document.getElementById('registroModal').classList.remove('hidden');
+                        });
+                    </text>
+        }
+
+            // ✅ Detectar registro exitoso
+    @if (TempData["RegistroExitoso"] != null)
+    {
+            <text>
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Cuenta creada exitosamente 🎉',
+                    text: 'Bienvenido(a) a ALODAN ❤️',
+                    confirmButtonColor: '#000'
+                }).then(() => {
+                    // ✅ Solo cerrar los modales, no redirigir
+                    document.getElementById('registroModal').classList.add('hidden');
+                    document.getElementById('loginModal').classList.add('hidden');
+                });
+            </text>
+    }
+
+        // ✅ Detectar error de login (CORREGIDO)
+        @if (TempData["ErrorLogin"] != null)
+        {
+                    <text>
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Inicio de sesión fallido',
+                            text: '@Html.Raw(TempData["ErrorLogin"])',
+                            confirmButtonColor: '#000'
+                        }).then(() => {
+                            document.getElementById('loginModal').classList.remove('hidden');
+                        });
+                    </text>
+        }
+
+        // ✅ Abrir modal si viene del botón "Proceder Pago"
+        @if (ViewBag.MostrarLogin != null && ViewBag.MostrarLogin == true)
+        {
+                    <text>
+                        document.getElementById('loginModal').classList.remove('hidden');
+                    </text>
+        }
+    });
+</script>
+
+
+
+
+
+
+
+
+

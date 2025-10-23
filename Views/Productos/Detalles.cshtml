@@ -1,0 +1,150 @@
+﻿@model ALODAN.Models.Producto
+
+@{
+    ViewData["Title"] = @Model.Nombre;
+}
+
+<div class="container mx-auto p-8">
+
+    <h2 class="text-base font-playfair font-semibold px-4 py-2 mb-6 border-b border-gray-300"
+        style="background-color:#E1DECD;">
+        <a href="@Url.Action("Index", "Productos", new { categoria = Model.Categoria })"
+           class="hover:underline">@Model.Categoria</a>
+        / @Model.Nombre
+    </h2>
+
+
+    <div class="flex flex-col md:flex-row items-start md:items-center">
+
+        <!-- 📸 Imagen del producto -->
+        <div class="md:w-1/2 p-4">
+            <img class="w-full h-auto rounded-lg shadow-lg" src="@Model.ImagenUrl" alt="@Model.Nombre">
+        </div>
+
+        <!-- 📄 Detalles -->
+        <div class="md:w-1/2 p-4 mt-6 md:mt-0">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">@Model.Nombre</h1>
+
+            <div class="text-yellow-400 text-2xl mb-4">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="far fa-star"></i>
+            </div>
+
+            <p class="text-2xl font-semibold text-gray-700">S/. @Model.Precio.ToString("N2")</p>
+            <p class="text-gray-600 mt-4">@Model.Descripcion</p>
+
+            <!-- ✅ Características -->
+            @if (!string.IsNullOrEmpty(Model.Caracteristicas))
+            {
+                var caracteristicas = Model.Caracteristicas.Split(',')
+                .Select(c => c.Trim())
+                .Where(c => !string.IsNullOrWhiteSpace(c))
+                .ToList();
+
+                <ul class="text-gray-600 mt-4 list-disc list-inside">
+                    @foreach (var caracteristica in caracteristicas)
+                    {
+                        <li>@caracteristica</li>
+                    }
+                </ul>
+            }
+
+            <!-- ✅ Colores -->
+            <!-- ✅ Colores -->
+            @if (!string.IsNullOrEmpty(Model.Colores))
+            {
+                var colores = Model.Colores.Split(',').Select(c => c.Trim()).ToList();
+
+                <div class="mt-6">
+                    <span class="font-semibold text-gray-700">Color:</span>
+                    <div class="flex space-x-2 mt-2">
+                        @foreach (var color in colores)
+                        {
+                            <button type="button"
+                                    class="js-color-option w-8 h-8 rounded-full border-2 border-gray-300 cursor-pointer hover:border-black transition"
+                                    style="background-color:@color"
+                                    data-color="@color"
+                                    aria-label="Color @color">
+                            </button>
+                        }
+                    </div>
+                </div>
+            }
+
+
+            <div class="flex justify-end mt-4">
+                <a href="#" class="text-sm text-black opacity-70 hover:opacity-100 transition">Ver guía de tallas</a>
+            </div>
+
+            <!-- 🛒 Formulario -->
+            <form id="formAgregarCarrito" method="post" asp-action="Agregar" asp-controller="Carrito">
+                <input type="hidden" name="id" value="@Model.Id" />
+                <input type="hidden" name="color" id="selectedColor" />
+
+                <div class="mt-4">
+                    <span class="font-semibold text-gray-700">Seleccionar talla</span>
+                    <select name="talla" class="block w-full mt-2 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500">
+                        @foreach (var talla in Model.Talla.Split(','))
+                        {
+                            <option value="@talla.Trim()">@talla.Trim()</option>
+                        }
+                    </select>
+                </div>
+
+                <button type="submit" class="w-full mt-6 py-3 px-4 bg-black text-white font-bold rounded-lg hover:bg-gray-700 transition-colors duration-300">
+                    Añadir al carrito
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- 🌟 Toast de advertencia -->
+<div id="toastColor" class="fixed top-5 right-5 bg-red-600 text-white px-5 py-3 rounded-lg shadow-lg hidden transition-opacity duration-500 opacity-0 z-50">
+    ⚠️ Por favor selecciona un color antes de agregar al carrito.
+</div>
+
+@section Scripts {
+    <script nonce="@Context.Items["CspNonce"]">
+        document.addEventListener('DOMContentLoaded', () => {
+          const options = document.querySelectorAll('.js-color-option');
+          const selectedInput = document.getElementById('selectedColor');
+          const form = document.getElementById('formAgregarCarrito');
+
+          // Selección de color
+          options.forEach(opt => {
+            opt.addEventListener('click', () => {
+              options.forEach(o => o.classList.remove('ring-2', 'ring-black'));
+              opt.classList.add('ring-2', 'ring-black');
+              // Toma el color desde data-attribute (más robusto que inline style leído)
+              selectedInput.value = opt.dataset.color || getComputedStyle(opt).backgroundColor;
+            });
+          });
+
+          // Validación con TOAST
+          form?.addEventListener('submit', (event) => {
+            if (!selectedInput.value) {
+              event.preventDefault();
+              mostrarToast();
+            }
+          });
+        });
+
+        // Toast visual
+        function mostrarToast() {
+          const toast = document.getElementById('toastColor');
+          if (!toast) return;
+          toast.classList.remove('hidden');
+          setTimeout(() => toast.classList.add('opacity-100'), 50);
+
+          // Se oculta después de 3 segundos
+          setTimeout(() => {
+            toast.classList.remove('opacity-100');
+            setTimeout(() => toast.classList.add('hidden'), 500);
+          }, 3000);
+        }
+    </script>
+}
