@@ -72,7 +72,7 @@ namespace Alodan.Controllers
             if (nuevoUsuario == null)
             {
                 TempData["ErrorRegistro"] = "Error al procesar el registro. Intenta nuevamente.";
-                return RedirectToReferrerOrCarrito();
+                return RedirectBackOrCarrito();
             }
 
             // ✅ Validar formato de correo electrónico
@@ -80,14 +80,14 @@ namespace Alodan.Controllers
             if (string.IsNullOrWhiteSpace(nuevoUsuario.Email) || !emailRegex.IsMatch(nuevoUsuario.Email))
             {
                 TempData["ErrorRegistro"] = "Ingresa un correo electronico valido (por ejemplo: nombre@dominio.com).";
-                return RedirectToReferrerOrCarrito();
+                return RedirectBackOrCarrito();
             }
 
             // ✅ Validar contraseña mínima 8 caracteres
             if (string.IsNullOrWhiteSpace(nuevoUsuario.Password) || nuevoUsuario.Password.Length < 8)
             {
                 TempData["ErrorRegistro"] = "La contrasena debe tener al menos 8 caracteres.";
-                return RedirectToReferrerOrCarrito();
+                return RedirectBackOrCarrito();
             }
 
             // ✅ Validar teléfono (9 dígitos)
@@ -96,14 +96,14 @@ namespace Alodan.Controllers
                 !nuevoUsuario.Telefono.All(char.IsDigit))
             {
                 TempData["ErrorRegistro"] = "El numero de telefono debe tener exactamente 9 digitos.";
-                return RedirectToReferrerOrCarrito();
+                return RedirectBackOrCarrito();
             }
 
             // ✅ Validar correo duplicado
             if (_context.Usuarios.Any(u => u.Email == nuevoUsuario.Email))
             {
                 TempData["ErrorRegistro"] = "Este correo ya esta registrado. Por favor, utiliza otro.";
-                return RedirectToReferrerOrCarrito();
+                return RedirectBackOrCarrito();
             }
 
             // ✅ Guardar usuario
@@ -135,17 +135,22 @@ namespace Alodan.Controllers
         }
 
         // 🔹 Método auxiliar para redirigir a la página anterior
-        private IActionResult RedirectToReferrerOrCarrito()
+        private IActionResult RedirectBackOrCarrito()
         {
-            var referer = Request.Headers["Referer"].ToString();
-            if (!string.IsNullOrEmpty(referer) && Uri.TryCreate(referer, UriKind.Absolute, out var refererUri))
+            // Intentar leer la URL guardada en sesión
+            var returnUrl = HttpContext.Session.GetString("ReturnUrl");
+
+            if (!string.IsNullOrWhiteSpace(returnUrl))
             {
-                return Redirect(referer);
+                // Limpio la sesión para que no se reutilice en otro flujo por accidente
+                HttpContext.Session.Remove("ReturnUrl");
+                return Redirect(returnUrl);
             }
 
-            // Por defecto, ir al carrito si no hay referer
+            // Fallback seguro → Carrito
             return RedirectToAction("Index", "Carrito");
         }
+
 
         // 🔹 Verificar correo duplicado (AJAX)
         [HttpGet]
