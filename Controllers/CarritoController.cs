@@ -35,6 +35,10 @@ namespace ALODAN.Controllers
 
         public IActionResult Agregar(int id, string talla, string color)
         {
+            if (!ModelState.IsValid)
+                return BadRequest("Datos inválidos.");
+
+
             var producto = _context.Productos.Find(id);
             if (producto == null) return NotFound();
 
@@ -62,6 +66,8 @@ namespace ALODAN.Controllers
         [HttpPost]
         public IActionResult Eliminar(int id)
         {
+            if (!ModelState.IsValid)
+                return BadRequest("Datos inválidos.");
             var carrito = HttpContext.Session.GetObject<List<CarritoItem>>(CarritoSessionKey) ?? new List<CarritoItem>();
             var item = carrito.FirstOrDefault(c => c.ProductoId == id);
 
@@ -99,6 +105,8 @@ namespace ALODAN.Controllers
         [HttpPost]
         public IActionResult ActualizarCantidad(int productoId, int nuevaCantidad)
         {
+            if (!ModelState.IsValid)
+                return BadRequest("Datos inválidos.");
             var carrito = HttpContext.Session.GetObject<List<CarritoItem>>(CarritoSessionKey) ?? new List<CarritoItem>();
             var item = carrito.FirstOrDefault(c => c.ProductoId == productoId);
 

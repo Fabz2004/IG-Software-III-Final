@@ -53,17 +53,20 @@
                         </td>
 
                         <td class="text-center align-middle">
-                            <form method="post" asp-action="ActualizarCantidad" asp-controller="Carrito"
-                                  class="flex justify-center items-center space-x-2">
+                            <form asp-controller="Carrito"
+                                  asp-action="ActualizarCantidad"
+                                  method="post" class="inline">
+                                @Html.AntiForgeryToken()
+
                                 <input type="hidden" name="productoId" value="@item.ProductoId" />
 
-                                <!-- Campo numérico editable -->
-                                <input type="number"
-                                       name="nuevaCantidad"
-                                       value="@item.Cantidad"
-                                       min="1"
-                                       class="w-16 text-center border border-gray-300 rounded p-1"
-                                       onchange="actualizarCantidadManual(this, @item.ProductoId)" />
+                                <!-- ¡NO uses disabled! (los disabled no viajan en el POST) -->
+                                <input type="number" name="nuevaCantidad"
+                                       value="@item.Cantidad" min="1" class="w-16 text-center" />
+
+                                <button type="submit" class="px-3 py-1 bg-black text-white rounded">
+                                    Actualizar
+                                </button>
                             </form>
                         </td>
 
@@ -72,18 +75,17 @@
                         </td>
 
                         <td class="p-2 text-center">
-                            <form id="formEliminar-@item.ProductoId"
-                                  method="post"
+                            <form asp-controller="Carrito"
                                   asp-action="Eliminar"
-                                  asp-controller="Carrito"
+                                  asp-route-id="@item.ProductoId"
+                                  method="post"
                                   class="inline">
-                                <input type="hidden" name="id" value="@item.ProductoId" />
-                                <button type="button"
-                                        class="text-red-500 hover:underline"
-                                        onclick="confirmarEliminacion(@item.ProductoId)">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-link text-red-600">
                                     Eliminar
                                 </button>
                             </form>
+
                         </td>
                     </tr>
                 }

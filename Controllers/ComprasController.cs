@@ -174,8 +174,11 @@ namespace ALODAN.Controllers
         // 🔹 Método auxiliar para redirigir a la página anterior
         private IActionResult RedirectToReferrerOrCheckout()
         {
-            var referer = Request.Headers["Referer"].ToString();
-            if (!string.IsNullOrEmpty(referer) && Uri.TryCreate(referer, UriKind.Absolute, out var refererUri))
+            var referer = Request.GetTypedHeaders().Referer?.ToString();
+
+            if (!string.IsNullOrEmpty(referer) &&
+                Uri.TryCreate(referer, UriKind.Relative, out _) &&
+                Url.IsLocalUrl(referer))
             {
                 return Redirect(referer);
             }
