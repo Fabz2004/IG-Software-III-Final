@@ -1,7 +1,4 @@
-﻿
-
-
-using ALODAN.Datos;
+﻿using ALODAN.Datos;
 using ALODAN.Helpers;
 using ALODAN.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -70,6 +67,11 @@ namespace Alodan.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Registro(Usuario nuevoUsuario)
         {
+            if (!ModelState.IsValid)
+            {
+                TempData["ErrorRegistro"] = "Datos incompletos o inválidos. Por favor revisa el formulario.";
+                return RedirectToAction("Index", "Carrito"); 
+            }
             if (nuevoUsuario == null)
             {
                 TempData["ErrorRegistro"] = "Error al procesar el registro. Intenta nuevamente.";
@@ -125,10 +127,10 @@ namespace Alodan.Controllers
             }
 
             // Si no tiene carrito, verificar el referer
-            var referer = Request.Headers["Referer"].ToString();
-            if (!string.IsNullOrEmpty(referer) && Uri.TryCreate(referer, UriKind.Absolute, out var refererUri))
+            var returnUrl = HttpContext.Session.GetString("ReturnUrl");
+            if (!string.IsNullOrWhiteSpace(returnUrl))
             {
-                return Redirect(referer);
+                return Redirect(returnUrl);
             }
 
             // Por defecto, ir a inicio de productos
@@ -180,4 +182,5 @@ namespace Alodan.Controllers
         }
     }
 }
+
 
