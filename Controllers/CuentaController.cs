@@ -1,5 +1,6 @@
 ﻿
 
+
 using ALODAN.Datos;
 using ALODAN.Helpers;
 using ALODAN.Models;
@@ -20,46 +21,46 @@ namespace Alodan.Controllers
             _context = context;
         }
 
-        //🔹 LOGIN
+        // 🔹 LOGIN
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Login(string Email, string Password)
         {
             var usuario = _context.Usuarios.FirstOrDefault(u => u.Email == Email && u.Password == Password);
 
+            // ❌ Credenciales inválidas
             if (usuario == null)
             {
-              
                 TempData["ErrorLogin"] = "Correo o contrasena incorrectos.";
 
-                
+                // 1️⃣ ¿Había una ruta pendiente guardada?
                 var returnUrl = HttpContext.Session.GetString("ReturnUrl");
-
-                if (!string.IsNullOrEmpty(returnUrl))
+                if (!string.IsNullOrWhiteSpace(returnUrl))
                 {
-                    return RedirectToAction("Index", "Carrito");
-                }
-                var referer = Request.Headers["Referer"].ToString();
-                if (!string.IsNullOrEmpty(referer) && Uri.TryCreate(referer, UriKind.Absolute, out var refererUri))
-                {
-                    return Redirect(referer);
+                    // Lo devolvemos ahí para que pueda volver a intentar
+                    return Redirect(returnUrl);
                 }
 
+                // 2️⃣ Fallback razonable si no hay returnUrl → Carrito
                 return RedirectToAction("Index", "Carrito");
             }
 
-            // ✅ Si las credenciales son correctas
+            // ✅ Credenciales correctas → iniciar sesión
             HttpContext.Session.SetString("UsuarioLogueado", JsonSerializer.Serialize(usuario));
 
+            // 3️⃣ ¿Estaba en un flujo especial? (ej. checkout)
             var returnUrlSuccess = HttpContext.Session.GetString("ReturnUrl");
-            if (!string.IsNullOrEmpty(returnUrlSuccess))
+            if (!string.IsNullOrWhiteSpace(returnUrlSuccess))
             {
+                // Ya está logueado, mandarlo donde quería ir originalmente
                 HttpContext.Session.Remove("ReturnUrl");
                 return Redirect(returnUrlSuccess);
             }
 
+            // 4️⃣ Fallback normal → Perfil
             return RedirectToAction("Perfil");
         }
+
 
 
 
@@ -179,3 +180,4 @@ namespace Alodan.Controllers
         }
     }
 }
+
