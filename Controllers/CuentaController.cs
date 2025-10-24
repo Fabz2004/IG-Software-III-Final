@@ -27,29 +27,24 @@ namespace Alodan.Controllers
         {
             var usuario = _context.Usuarios.FirstOrDefault(u => u.Email == Email && u.Password == Password);
 
-            // ❌ Si el usuario no existe o la contraseña no coincide
             if (usuario == null)
             {
-                // ✅ Guardar error en TempData
+              
                 TempData["ErrorLogin"] = "Correo o contrasena incorrectos.";
 
-                // ✅ Verificar si hay una URL de retorno guardada
+                
                 var returnUrl = HttpContext.Session.GetString("ReturnUrl");
 
                 if (!string.IsNullOrEmpty(returnUrl))
                 {
-                    // Si venía del botón "Proceder Pago", volver al carrito
                     return RedirectToAction("Index", "Carrito");
                 }
-
-                // ✅ Si no hay returnUrl, intentar obtener la página anterior
                 var referer = Request.Headers["Referer"].ToString();
                 if (!string.IsNullOrEmpty(referer) && Uri.TryCreate(referer, UriKind.Absolute, out var refererUri))
                 {
                     return Redirect(referer);
                 }
 
-                // Por defecto, ir al carrito
                 return RedirectToAction("Index", "Carrito");
             }
 

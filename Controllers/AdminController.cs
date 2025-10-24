@@ -68,6 +68,10 @@ namespace ALODAN.Controllers
         [HttpGet]
         public IActionResult EditarProducto(int id)
         {
+            if (!ModelState.IsValid || id <= 0)
+            {
+                return BadRequest("Solicitud inválida o ID no válido.");
+            }
             if (!EsAdmin()) return RedirectToAction("Inicio", "Productos");
 
             var producto = _context.Productos.Find(id);
@@ -94,6 +98,8 @@ namespace ALODAN.Controllers
         public IActionResult EliminarProducto(int id)
         {
             if (!EsAdmin()) return RedirectToAction("Inicio", "Productos");
+            if (!ModelState.IsValid)
+                return View("ErrorValidacion");
 
             var producto = _context.Productos.Find(id);
             if (producto == null) return NotFound();
@@ -122,7 +128,10 @@ namespace ALODAN.Controllers
         public IActionResult ActualizarEstado(int id, string nuevoEstado)
         {
             if (!EsAdmin()) return RedirectToAction("Inicio", "Productos");
-
+            if (!ModelState.IsValid || string.IsNullOrWhiteSpace(nuevoEstado))
+            {
+                return BadRequest("Datos inválidos.");
+            }
             var pedido = _context.Pedidos.Find(id);
             if (pedido == null) return NotFound();
 

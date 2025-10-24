@@ -190,6 +190,10 @@ namespace ALODAN.Controllers
         // 🔹 Ver estado de envío
         public IActionResult EstadoEnvio(int id)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest("Solicitud inválida.");
+            }
             var pedido = _context.Pedidos
                 .Include(p => p.Usuario)
                 .Include(p => p.Detalles)
